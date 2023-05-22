@@ -2,6 +2,44 @@ import streamlit as st
 import json
 import pandas as pd
 import matplotlib.pyplot as plt
+from jsonbin import load_key, save_key
+import yaml
+from yaml.loader import SafeLoader
+import streamlit_authenticator as stauth
+
+# -------- load secrets for jsonbin.io --------
+jsonbin_secrets = st.secrets["jsonbin"]
+api_key = jsonbin_secrets["api_key"]
+bin_id = jsonbin_secrets["bin_id"]
+
+# -------- user login --------
+with open('config.yaml') as file:
+    config = yaml.load(file, Loader=SafeLoader)
+
+authenticator = stauth.Authenticate(
+    config['credentials'],
+    config['cookie']['name'],
+    config['cookie']['key'],
+    config['cookie']['expiry_days'],
+)
+
+fullname, authentication_status, username = authenticator.login('Login', 'main')
+
+if authentication_status == True:   # login successful
+    authenticator.logout('Logout', 'main')   # show logout button
+elif authentication_status == False:
+    st.error('Username/password is incorrect')
+    st.stop()
+elif authentication_status == None:
+    st.warning('Please enter your username and password')
+    st.stop()
+
+st.write(username)
+
+data = load_key(api_key, bin_id, username)
+st.write(data)
+
+
 
 # Funktion um die Daten zu laden
 def load_data(filename):
@@ -13,6 +51,8 @@ def load_data(filename):
 def save_data(data, filename):
     with open(filename, "w", encoding="utf-8") as file:
         json.dump(data, file, indent=2, ensure_ascii=False)
+
+#save_key(api_key, bin_id, data)
 
 # Daten laden oder leeres Dictionary aufmachen
 filename = "data.json"
