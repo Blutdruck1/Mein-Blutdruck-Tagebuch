@@ -34,10 +34,10 @@ elif authentication_status == None:
     st.warning('Please enter your username and password')
     st.stop()
 
-st.write(username)
+#st.write(username)
 
 data = load_key(api_key, bin_id, username)
-st.write(data)
+#st.write(data)
 
 
 
